@@ -1,6 +1,13 @@
 import crypto from 'crypto';
 import config from './config.js';
 
+/*
+Metaphore : 
+Cipher: boite avec cadenas
+Message : contenu dans la boite
+IV: change la façon dont le contenu est rangé dans la boite
+*/
+
 const { secret_key, secret_iv, encryption_method } = config;
 
 if (!secret_key || !secret_iv || !encryption_method) {
@@ -9,10 +16,17 @@ if (!secret_key || !secret_iv || !encryption_method) {
 
 //Generate secret hash whith crypto to use for encryption
 const key = crypto
+    // Crée une instance de hashage avec l'algorithme sha512
     .createHash('sha512')
+
+    // Met à jour l'instance de hashage avec la clé secrète
     .update(secret_key)
+    // Récupère la valeur de hashage en hexadécimal et prend les 32 premiers caractères
     .digest('hex')
     .substring(0, 32);
+
+// Initialisation vector for encryption
+// Permet d'avoir un chiffrement plus aléatoire
 const encryptionIV = crypto
     .createHash('sha512')
     .update(secret_iv)
@@ -24,26 +38,18 @@ export function encryptData(data) {
     const cipher = crypto.createCipheriv(encryption_method, key, encryptionIV);
     return Buffer.from(
         cipher.update(data, 'utf8', 'hex') + cipher.final('hex')
-    ).toString('base64'); // Encrypt dataa and convert to hex and based 64
+    ).toString('base64'); // Encrypt data and convert to hex and based 64
 };
 
 //Decrypt data
 export function decryptData(encryptedData) {
-    if (!encryptedData) {
-        throw new Error('Encrypted data is required');
-    }
-
-    try {
-        // Convert base64 string to buffer
-        const buff = Buffer.from(encryptedData, 'base64');
-        const decipher = crypto.createDecipheriv(encryption_method, key, encryptionIV);
-
-        // Perform decryption and return the result as a UTF-8 string
-        const decrypted = decipher.update(buff, null, 'utf8') + decipher.final('utf8');
-        return decrypted;
-    } catch (error) {
-        throw new Error('Failed to decrypt data: ' + error.message);
-    }
+    const buff = Buffer.from(encryptedData, 'base64')
+    const decipher = crypto.createDecipheriv(encryption_method, key, encryptionIV)
+    return (
+        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
+        decipher.final('utf8')
+    ) // Decrypts data and converts to utf8
 }
+
 
 
