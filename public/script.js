@@ -1,23 +1,14 @@
-import { showCryptedData, showDecryptedData } from "./showCrypted.js";
+import { showCryptedData, showDecryptedData, sendDataToDecrypt } from "./showCrypted.js";
 
-const form = document.querySelector("#form-encrypt");
+const form1 = document.querySelector("#form-encrypt");
 const containerCrypted = document.querySelector("#crypted");
-const containerDecrypted = document.querySelector("#decrypted");
 
-async function sendData() {
+async function sendData(form, url) {
     const formData = new FormData(form);
-    let valuePost = "";
-
-    for (const [ _, value] of formData){
-        valuePost = value;
-    }
-
-    const data = {data: valuePost};
-
-    console.log(data);
+    const data = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch('/encrypt', {
+        const response = await fetch(`/${url}`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -26,19 +17,28 @@ async function sendData() {
         });
 
         let result = await response.json();
-        console.log(result);   
-        
+        console.log(result);
+
         showCryptedData(containerCrypted, "Cryptage :", result.encryptedData);
+
+        showDecryptedData(containerCrypted, result.encryptedData);
+
+        const form2 = document.querySelector("#form-decrypt");
+        
+        form2.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendDataToDecrypt(form2, "decrypt", containerCrypted);
+        });
         
     } catch (e) {
         console.error(e);
     }
 }
 
-
-
-form.addEventListener('submit', (e) => {
+form1.addEventListener('submit', (e) => {
     e.preventDefault();
-    sendData();
+    sendData(form1, "encrypt");
 });
+
+
 
