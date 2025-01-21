@@ -4,7 +4,7 @@ import { encryptData, decryptData } from './encryption.js';
 const router = express.Router();
 
 router.post('/encrypt', (req, res) => {
-    const re = /^[a-zA-Z0-9À-ÿ]+$/;
+    const re = /^[a-zA-Z0-9À-ÿ' ]+$/;
     try {
         // Prend la valeur de data dans le body de la requête
         const { data } = req.body;
@@ -13,7 +13,7 @@ router.post('/encrypt', (req, res) => {
             throw new Error("Le champ est requis");
         }
 
-        if(!re.test(data)) {
+        if (!re.test(data)) {
             throw new Error("Le champ n'accepte pas les caractères spéciaux");
         }
 
@@ -28,9 +28,14 @@ router.post('/encrypt', (req, res) => {
 });
 
 router.post('/decrypt', (req, res) => {
-
+    const re = /^[a-zA-Z0-9À-ÿ': ]+$/;
     try {
         const { encryptedData } = req.body;
+
+        if (!re.test(encryptedData)) {
+            throw new Error("Le champ n'accepte pas les caractères spéciaux");
+        }
+
         const data = decryptData(encryptedData);
         res.json({ data });
     } catch (error) {

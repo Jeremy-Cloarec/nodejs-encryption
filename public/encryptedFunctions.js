@@ -19,7 +19,7 @@ export function showDecryptedData(container, encryptedData) {
     input.setAttribute('placeholder', 'Encrypted data');
     const button = document.createElement('button');
     button.setAttribute('type', 'submit');
-    button.textContent = 'Decrypt';
+    button.textContent = 'Decrypter';
     form.appendChild(input);
     form.appendChild(button);
     container.appendChild(form);

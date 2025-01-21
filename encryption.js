@@ -1,7 +1,5 @@
 import crypto from 'crypto';
 import config from './config.js';
-import { error } from 'console';
-import e from 'express';
 
 /*
 Metaphore : 
@@ -10,10 +8,10 @@ Message : contenu dans la boite
 IV: change la façon dont le contenu est rangé dans la boite
 */
 
-const { secret_key, secret_iv, encryption_method } = config;
+const { secret_key, encryption_method } = config;
 
-if (!secret_key || !secret_iv || !encryption_method) {
-    throw new Error('secretKey, secretIV, and encryptionMetho are required');
+if (!secret_key || !encryption_method) {
+    throw new Error('secretKey, secretIV, and encryptionMethod are required');
 }
 
 //Generate secret hash whith crypto to use for encryption
@@ -27,24 +25,16 @@ const key = crypto
     .digest('hex')
     .substring(0, 32);
 
-// Initialisation vector for encryption
-// Permet d'avoir un chiffrement plus aléatoire
-const encryptionIV = crypto
-    .createHash('sha512')
-    .update(secret_iv)
-    .digest('hex')
-    .substring(0, 16);
-
 //Encrypt data
 export function encryptData(data) {
     try {
-        const cipher = crypto.createCipheriv(encryption_method, key, encryptionIV);
-        return Buffer.from(
-            cipher.update(data, 'utf8', 'hex') + cipher.final('hex')
-        ).toString('base64'); // Encrypt data and convert to hex and based 64
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv(encryption_method, key, iv);
+        const encrypted = cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+        return `${iv.toString('hex')}:${encrypted}`;
 
     } catch (error) {
-        console.error( error);
+        console.error(error);
         throw new Error("Une erreur est survenue lors du chiffrement");
     }
 };
@@ -52,11 +42,12 @@ export function encryptData(data) {
 //Decrypt data
 export function decryptData(encryptedData) {
     try {
-        const buff = Buffer.from(encryptedData, 'base64')
-        const decipher = crypto.createDecipheriv(encryption_method, key, encryptionIV)
+        const [ivHex, encrypted] = encryptedData.split(':');
+        const iv = Buffer.from(ivHex, 'hex');
+        const decipher = crypto.createDecipheriv(encryption_method, key, iv);
         return (
-            decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
-            decipher.final('utf8'))
+            decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8')
+        );
         // Decrypts data and converts to utf8
 
     } catch (error) {
