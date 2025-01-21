@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 import config from './config.js';
+import { error } from 'console';
+import e from 'express';
 
 /*
 Metaphore : 
@@ -35,20 +37,32 @@ const encryptionIV = crypto
 
 //Encrypt data
 export function encryptData(data) {
-    const cipher = crypto.createCipheriv(encryption_method, key, encryptionIV);
-    return Buffer.from(
-        cipher.update(data, 'utf8', 'hex') + cipher.final('hex')
-    ).toString('base64'); // Encrypt data and convert to hex and based 64
+    try {
+        const cipher = crypto.createCipheriv(encryption_method, key, encryptionIV);
+        return Buffer.from(
+            cipher.update(data, 'utf8', 'hex') + cipher.final('hex')
+        ).toString('base64'); // Encrypt data and convert to hex and based 64
+
+    } catch (error) {
+        console.error( error);
+        throw new Error("Une erreur est survenue lors du chiffrement");
+    }
 };
 
 //Decrypt data
 export function decryptData(encryptedData) {
-    const buff = Buffer.from(encryptedData, 'base64')
-    const decipher = crypto.createDecipheriv(encryption_method, key, encryptionIV)
-    return (
-        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
-        decipher.final('utf8')
-    ) // Decrypts data and converts to utf8
+    try {
+        const buff = Buffer.from(encryptedData, 'base64')
+        const decipher = crypto.createDecipheriv(encryption_method, key, encryptionIV)
+        return (
+            decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
+            decipher.final('utf8'))
+        // Decrypts data and converts to utf8
+
+    } catch (error) {
+        console.error(error);
+        throw new Error("Une erreur est survenue lors du déchiffrement");
+    }
 }
 
 

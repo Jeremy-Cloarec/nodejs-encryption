@@ -42,6 +42,19 @@ export async function sendDataToDecrypt(form, url) {
             },
             body: JSON.stringify(data),
         });
+        
+        if(!response.ok) {
+            const errorData = await response.json();
+            console.error('Erreur : ', errorData.error);
+
+            containerDecrypted.textContent = "";
+            const p = document.createElement('p');
+            p.classList.add('error');
+            p.textContent = errorData.error;
+            containerDecrypted.appendChild(p);
+
+            return;
+        }
 
         let result = await response.json();
         console.log(result);
