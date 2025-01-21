@@ -4,12 +4,17 @@ import { encryptData, decryptData } from './encryption.js';
 const router = express.Router();
 
 router.post('/encrypt', (req, res) => {
+    const re = /^[a-zA-Z0-9À-ÿ]+$/;
     try {
         // Prend la valeur de data dans le body de la requête
         const { data } = req.body;
 
         if (!data) {
-            throw new Error('Le champ est requis');
+            throw new Error("Le champ est requis");
+        }
+
+        if(!re.test(data)) {
+            throw new Error("Le champ n'accepte pas les caractères spéciaux");
         }
 
         // Appelle la fonction encryptData avec la valeur de data en paramètre
@@ -23,6 +28,7 @@ router.post('/encrypt', (req, res) => {
 });
 
 router.post('/decrypt', (req, res) => {
+
     try {
         const { encryptedData } = req.body;
         const data = decryptData(encryptedData);
