@@ -29,8 +29,7 @@ The encryption method is 256-bit AES encryption, which is a symmetric encryption
     ```sh
     yarn dev
     ```
-2. 
-Go to http://localhost:3000 in your browser.
+2. Go to http://localhost:3000 in your browser.
 
-Enter the text you want to encrypt and click the "Encrypt" button.
+3. Enter the text you want to encrypt and click the "Encrypt" button.
 
